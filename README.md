@@ -15,3 +15,7 @@ Java broad documentation.
 [Java - Design Patterns](./java/design-patterns/README.md)
 
 [Java - Memory Management](./java/memory-management/README.md)
+
+## Concepts
+
+[Concept - Hexagonal architecture](./concepts/hexagonal-architecture/README.md)
