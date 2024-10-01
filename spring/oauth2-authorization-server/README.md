@@ -10,14 +10,14 @@
 ## Setup
 ### Step 1: Installation
 For Maven
-```
+```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-oauth2-authorization-server</artifactId>
 </dependency>
 ```
 or using Gradle
-```
+```gradle
 implementation "org.springframework.boot:spring-boot-starter-oauth2-authorization-server"
 ```
 
@@ -65,7 +65,7 @@ This approach is ideal for third-party authentication because the client doesn't
 
 #### Create the authorization server configuration component
 
-```
+```java
 @Configuration
 public class AuthorizationServerConfig {
 
@@ -187,7 +187,7 @@ How we obtain the access token depends on how we have configured the allowed aut
 
 This means that we can obtain the token using a **POST** request.
 
-```
+```bash
 curl -X POST http://127.0.0.1:8080/oauth2/token \
 -H "Content-Type: application/x-www-form-urlencoded" \
 -d "grant_type=authorization_code" \
@@ -205,7 +205,7 @@ In our request, we have indicated the following parameters:
 
 If everything went well, we should get a response similar to this one.
 
-```
+```json
 {
     "access_token": "<SOME ACCESS TOKEN>",
     "refresh_token": "<SOME REFRESH TOKEN>",
@@ -220,7 +220,7 @@ Notice that the refresh token was provided so that we can use it to get another 
 #### Use the access token
 Finally, we can use the access token to access various protected services.
 
-```
+```bash
 curl -X GET http://localhost:8080/api/protected-resource \
 -H "Authorization: Bearer <OUR_ACCESS_TOKEN>"
 ```
