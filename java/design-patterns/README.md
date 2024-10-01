@@ -10,7 +10,7 @@
 - Useful for classes that manage resources (database connection, sockets, ..).
 - Provides global access point to the instance.
 
-```
+```Java
 class MySingleton {
   
   static ResourceClass myResource;
@@ -34,7 +34,7 @@ class MySingleton {
 - Same as Factory but takes advantage of inheritance to return multiple object classes.
 - **Factory creates objects of a single class, Abstract Factory creates objects of related classes.**
 
-```
+```Java
 class ComputerFactory {
 
   /**
@@ -59,7 +59,7 @@ class ComputerFactory {
 - Allows multiple representations to be created.
 - Used by `StringBuilder` and `StringBuffer`.
 
-```
+```Java
 AsusComputer computer = AsusComputer.Builder()
     .brand("ASUS")
     .ram(8)

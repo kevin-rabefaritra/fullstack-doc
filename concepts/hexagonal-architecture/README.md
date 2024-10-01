@@ -36,14 +36,14 @@ Presentation <-> Interface <-> Business logic <-> Interface <-> Data
 
 This way, the presentation layer is less concerned about the business logic details, so is the business logic regarding the data layer.
 
-```
+```Java
 interface EmployeeRepository {
   void save(Employee employee);
   void deleteById(UUID id);
 }
 ```
 
-```
+```Java
 class InMemoryEmployeeRepository implements EmployeeRepository {
   Map<UUID, Employee> employees = new HashMap<>();
 
@@ -59,7 +59,7 @@ class InMemoryEmployeeRepository implements EmployeeRepository {
 }
 ```
 
-```
+```Java
 class DynamoDBEmployeeRepository implements EmployeeRepository {
   
   @Override
@@ -76,14 +76,14 @@ class DynamoDBEmployeeRepository implements EmployeeRepository {
 
 The implementation of `EmployeeService` now deals with the interface `EmployeeRepository`.
 
-```
+```Java
 interface EmployeeService {
   Employee hire(Employee employee);
   void fire(Employee employee);
 }
 ```
 
-```
+```Java
 class EmployeeServiceImpl implements EmployeeService {
 
   final EmployeeRepository employeeRepository;
@@ -110,7 +110,7 @@ If we want to replace our data layer, we just need to replace the `EmployeeRepos
 
 We can also take advantage of Spring **profiles** to have the instance based on the configuration profile.
 
-```
+```Java
 @Bean
 EmployeeRepository employeeRepository() {
   /*
@@ -134,19 +134,19 @@ Presentation <->                  <-> HumanResources <-> Employees (data)
 
 Here, `HiringEmployee`, `FiringEmployee`, `Employees` are interfaces.
 
-```
+```Java
 interface HiringEmployee {
   Employee hire(Employee employee);
 }
 ```
 
-```
+```Java
 interface FiringEmployee {
   void fire(UUID id);
 }
 ```
 
-```
+```Java
 interface Employees {
   Employee save(Employee employee);
   void deleteById(UUID id);
@@ -155,7 +155,7 @@ interface Employees {
 
 The class `HumanResources` operates entities and repositories.
 
-```
+```Java
 class HumanResources implements HiringEmployee, FiringEmployee {
 
   final Employees employees;
@@ -176,8 +176,7 @@ class HumanResources implements HiringEmployee, FiringEmployee {
 
 Acceptance tests will deal less with technical concerns in favor of business requirements.
 
-```
-
+```Java
 @BeforeEach
 void setup() {
   employees = InMemoryEmployees();
@@ -195,7 +194,7 @@ void testEmployeeHasBeenHired() {
 
 Our presentation layer will look like this 
 
-```
+```Java
 @RestController
 @RequestMapping
 class EmployeeController {
