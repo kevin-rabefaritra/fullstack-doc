@@ -2,16 +2,24 @@
 
 Implement a resource server in your app, it covers:
 - authentication mechanism for users.
-- web **access** and **refresh tokens** generation.
+- web **access tokens** generation.
 - token validity verification.
 
 We will create 3 endpoints:
 1. User authentication
-2. Renew access token using refresh token
-4. Access protected resources
+2. Access protected resources
 3. Get user info using their access token
 
-## User management
+## 1. Add dependency
+Add the OAuth 2.0 resource server dependency, which includes **Spring Security**.
+```xml
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+</dependency>
+```
+
+## 2. Implement UserDetailsService
 Create a `UserDetailsService` bean. For simplicity, we will use `In-Memory Authentication`(more details [here](https://docs.spring.io/spring-security/reference/servlet/authentication/passwords/in-memory.html)).
 
 ```java
@@ -19,43 +27,39 @@ import org.springframework.security.core.userdetails.User;
 ...
 @Bean
 public UserDetailsService userDetailsService() {
-    UserDetails user1 = User.builder()
+    UserDetails user = User.builder()
         .username("user1")
         .password("{noop}password1")
         .build();
-	UserDetails user2 = User.builder()
-        .username("admin")
-        .password("{noop}password2")
-        .build();
-	return new InMemoryUserDetailsManager(user1, user2);
+	return new InMemoryUserDetailsManager(user);
 }
 ```
 
 In a real-case scenario, user credentials should be **encrypted** and **stored in a persistent storage**.
 
-## Security configuration
+## 3. Security configuration
 **Step 1**: Create a `SecurityFilterChain` bean to protect endpoints and register our OAuth 2.0 resource server.
 
 ```java
 @Bean
 SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 	return httpSecurity
-		.csrf(AbstractHttpConfigurer::disable) // CSRF not required in our scenario
-		.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-		.authorizeHttpRequests(requests -> {
-			authorizeRequests.anyRequest().authenticated();
-		})
-		.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())) // used for token processing
-		.httpBasic(Customizer.withDefaults()) // Used for user basic authentication
-		.build();
+	.csrf(AbstractHttpConfigurer::disable) // CSRF not required since we don't use sessions
+	.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+	.authorizeHttpRequests(requests -> {
+		authorizeRequests.anyRequest().authenticated();
+	}) // require all requests to be authenticated
+	.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())) // used for JWT processing
+	.httpBasic(Customizer.withDefaults()) // Used for user basic authentication
+	.build();
 }
 ```
 
 **Step 2**: Create a RSA public and private key.
 
-We will generate a PKCS8 key pair `public.pem` and `private.pem` and put them under the `main/resources` folder. You can use online tools to generate them.
+We will generate a PKCS8 key pair `public.pem` and `private.pem` and put them under the `main/resources` folder. You can use an online tool to generate them.
 
-We can reference the keys in our `application.properties` file.
+Then we can reference the keys in our `application.properties` file.
 
 ```properties
 rsa.public-key=classpath:public.pem
@@ -88,7 +92,10 @@ JwtDecoder jwtDecoder() {
 }
 ```
 
-## Generating a token
+## 4. Generating a token
+
+Through basic authentication, we can retrieve the authenticated user information from the `Authentication` object provided in our endpoints.
+
 **Step 1**: We need to create a service that generates tokens from an `Authentication`.
 
 ```java
@@ -98,14 +105,14 @@ private JwtEncoder jwtEncoder;
 public String generateToken(Authentication authentication) {
 	Instant now = Instant.now();
 	String scope = authentication.getAuthorities().stream()
-			.map(GrantedAuthority::getAuthority)
-			.collect(Collectors.joining(" "));
+		.map(GrantedAuthority::getAuthority)
+		.collect(Collectors.joining(" "));
 	JwtClaimsSet claims = JwtClaimsSet.builder()
-			.issuer("self")
-			.issuedAt(now)
-			.expiresAt(now.plus(2, ChronoUnit.HOURS))
-			.subject(authentication.getName())
-			.build();
+		.issuer("self") // we can put any issuer here
+		.issuedAt(now)
+		.expiresAt(now.plus(2, ChronoUnit.HOURS)) // define the expiration date of the token
+		.subject(authentication.getName())
+		.build();
 	return this.jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 }
 ```
@@ -119,6 +126,10 @@ String authenticate(Authentication authentication) {
 }
 ```
 
-That is, if the user authenticates successfully using the *basic authentication* `httpBasic` registered in our `SecurityFilterChain` bean, the request will reach our controller with the user info in the `Authentication` parameter.
+**Step 3**: we can now authenticate to obtain a token
 
-We then pass this `Authentication` parameter to our `generateToken` method and return the token.
+```bash
+curl --request GET \
+  --url http://localhost:8080/api/oauth2/login \
+  --header 'Authorization: Basic <USER BASE64 USERNAME:PASSWORD>'
+```
