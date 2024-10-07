@@ -17,6 +17,8 @@ Spring related documentation. Assuming you already have some knownledge with Spr
 
 [Spring Boot - OAuth 2.0 Authorization Server](./spring/oauth2-authorization-server/README.md)
 
+[Spring Boot - OAuth 2.0 self-implementation with resource server](./spring/oauth2-self-implementation/README.md)
+
 [Spring - Beans](./spring/beans/README.md)
 
 ## Java
