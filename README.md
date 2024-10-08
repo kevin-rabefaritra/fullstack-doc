@@ -15,9 +15,9 @@ Various compiled docs for full-stack people, but mainly about **Java** and **Spr
 Spring related documentation. Assuming you already have some knownledge with Spring Core / Boot, we try to go beyond the classic *Entity-Repository-Service-Controller* stuff.
 
 
-[Spring Boot - OAuth 2.0 Authorization Server](./spring/oauth2-authorization-server/README.md)
+[Spring Security - OAuth 2.0 Authorization Server](./spring/oauth2-authorization-server/README.md)
 
-[Spring Boot - OAuth 2.0 self-implementation with resource server](./spring/oauth2-self-implementation/README.md)
+[Spring Security - OAuth 2.0 self-implementation with resource server](./spring/oauth2-self-implementation/README.md)
 
 [Spring - Beans](./spring/beans/README.md)
 
